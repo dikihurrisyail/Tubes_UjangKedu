@@ -1,5 +1,5 @@
 @echo off
-REM KicauMania.cmd - Jalankan bot dalam mode development atau release
+REM UjangKeduAduh.cmd - Jalankan bot dalam mode development atau release
 REM Set MODE=dev untuk development (default, selalu rebuild)
 REM Set MODE=release untuk release (hanya jalankan jika bin ada)
 

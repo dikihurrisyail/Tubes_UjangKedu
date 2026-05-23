@@ -1,7 +1,9 @@
 {
-  "name": "KicauMania2",
+  "name": "UjangKeduAduh",
   "version": "1.0",
-  "authors": ["IRK Lab"],
+  "authors": ["Diki",
+              "Cornel",
+              "Agit"],
   "description": "Greedy bot: mengejar dan menabrak musuh dengan energi terendah untuk memaksimalkan Ram Damage Bonus.",
   "homepage": "",
   "countryCodes": ["id"],

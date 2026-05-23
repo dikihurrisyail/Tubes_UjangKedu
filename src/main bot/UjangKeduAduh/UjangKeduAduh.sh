@@ -1,5 +1,5 @@
 #!/bin/sh
-# KicauMania.sh - Jalankan bot KicauMania
+# UjangKeduAduh.sh - Jalankan bot UjangKeduAduh
 # Mode development: selalu bersihkan, rebuild, dan jalankan.
 # Mode release (dikomentari): jalankan tanpa rebuild.
 
