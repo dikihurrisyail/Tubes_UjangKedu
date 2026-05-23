@@ -3,56 +3,24 @@ using System.Drawing;
 using Robocode.TankRoyale.BotApi;
 using Robocode.TankRoyale.BotApi.Events;
 
-/// <summary>
-/// ============================================================
-/// UjangKeduAduh
-/// ============================================================
-///
-/// STRATEGI:
-/// - Mengincar musuh paling dekat
-/// - Mengejar lalu menabrak musuh
-/// - Menembak hanya saat jarak dekat
-/// - Anti nyangkut tembok
-///
-/// GREEDY STRATEGY:
-/// Selalu memilih target dengan jarak terdekat
-/// karena:
-/// - peluang tabrak lebih tinggi
-/// - peluang hit lebih besar
-/// - damage lebih konsisten
-///
-/// OBJECTIVE:
-/// - Maksimalkan ram damage
-/// - Maksimalkan hit accuracy
-/// - Maksimalkan pressure agresif
-/// ============================================================
-/// </summary>
 public class UjangKeduAduh : Bot
 {
-    // =========================================================
-    // DATA TARGET
-    // =========================================================
     double enemyX;
     double enemyY;
-    double enemyDistance = double.MaxValue;
-
     bool enemyDetected = false;
+    
+    // ← TAMBAHAN: flag anti-stuck
+    bool isEscapingWall = false;
+    int escapeTicksLeft = 0;
 
     Random rnd = new Random();
 
-    static void Main(string[] args)
-    {
-        new UjangKeduAduh().Start();
-    }
+    static void Main(string[] args) => new UjangKeduAduh().Start();
 
-    UjangKeduAduh()
-        : base(BotInfo.FromFile("UjangKeduAduh.json")) { }
+    UjangKeduAduh() : base(BotInfo.FromFile("UjangKeduAduh.json")) { }
 
     public override void Run()
     {
-        // =====================================================
-        // WARNA BOT
-        // =====================================================
         BodyColor = Color.DarkRed;
         TurretColor = Color.Red;
         RadarColor = Color.Yellow;
@@ -61,103 +29,53 @@ public class UjangKeduAduh : Bot
         TracksColor = Color.Black;
         GunColor = Color.Firebrick;
 
-        // =====================================================
-        // RADAR & GUN INDEPENDENT
-        // =====================================================
         AdjustRadarForBodyTurn = true;
         AdjustGunForBodyTurn = true;
         AdjustRadarForGunTurn = true;
 
         while (IsRunning)
         {
-            // =================================================
-            // RADAR SWEEP
-            // =================================================
-            SetTurnRadarRight(45);
+            SetTurnRadarRight(360);
 
-            // =================================================
-            // ANTI WALL
-            // =================================================
-            double margin = 120;
-
-            bool nearWall =
-                X < margin ||
-                X > ArenaWidth - margin ||
-                Y < margin ||
-                Y > ArenaHeight - margin;
-
-            if (nearWall)
+            // =========================================
+            // PRIORITAS 1: KELUAR DARI TEMBOK
+            // =========================================
+            if (isEscapingWall)
             {
-                // Kembali ke tengah arena
-                double centerAngle =
-                    NormalizeRelativeAngle(
-                        DirectionTo(
-                            ArenaWidth / 2,
-                            ArenaHeight / 2)
-                        - Direction);
+                // Mundur + belok jauh dari tembok
+                SetBack(120);
+                // Saat mundur, arahkan ke tengah arena
+                double angleToCenter = DirectionTo(ArenaWidth / 2.0, ArenaHeight / 2.0);
+                double turnToCenter = NormalizeRelativeAngle(angleToCenter - Direction);
+                SetTurnLeft(turnToCenter);
 
-                SetTurnLeft(centerAngle);
-
-                SetForward(220);
+                escapeTicksLeft--;
+                if (escapeTicksLeft <= 0)
+                    isEscapingWall = false;
 
                 Go();
-
-                continue;
+                continue; // ← skip logika chase saat escaping
             }
 
-            // =================================================
-            // JIKA TARGET ADA
-            // =================================================
+            // =========================================
+            // LOGIKA NORMAL
+            // =========================================
             if (enemyDetected)
             {
-                // =============================================
-                // KEJAR TARGET TERDEKAT
-                // =============================================
-                double angleToEnemy =
-                    DirectionTo(enemyX, enemyY);
-
-                double bodyTurn =
-                    NormalizeRelativeAngle(
-                        angleToEnemy - Direction);
-
-                // Body langsung hadap musuh
+                double angleToEnemy = DirectionTo(enemyX, enemyY);
+                double bodyTurn = NormalizeRelativeAngle(angleToEnemy - Direction);
                 SetTurnLeft(bodyTurn);
+                SetForward(200);
 
-                // Maju agresif
-                if (enemyDistance > 150)
-                    SetForward(200);
-                else
-                    SetForward(120);
-
-                // =============================================
-                // AIM GUN
-                // =============================================
-                double gunTurn =
-                    NormalizeRelativeAngle(
-                        angleToEnemy - GunDirection);
-
+                double gunTurn = NormalizeRelativeAngle(angleToEnemy - GunDirection);
                 SetTurnGunLeft(gunTurn);
 
-                // =============================================
-                // TEMBAK HANYA JIKA SUDAH DEKAT
-                // =============================================
-                // Menghemat peluru
-                // dan meningkatkan akurasi
-                if (enemyDistance < 170 &&
-                    Math.Abs(gunTurn) < 12 &&
-                    GunHeat == 0 &&
-                    Energy > 1)
-                {
+                if (Math.Abs(gunTurn) < 15 && GunHeat == 0)
                     SetFire(3);
-                }
             }
             else
             {
-                // =================================================
-                // SEARCH MODE
-                // =================================================
-                SetTurnLeft(20);
-
+                SetTurnLeft(25);
                 SetForward(100);
             }
 
@@ -167,84 +85,60 @@ public class UjangKeduAduh : Bot
 
     public override void OnScannedBot(ScannedBotEvent e)
     {
-        // =====================================================
-        // GREEDY TARGET SELECTION
-        // =====================================================
-        // Hanya pilih musuh paling dekat
-        // =====================================================
-        double dist = DistanceTo(e.X, e.Y);
+        enemyX = e.X;
+        enemyY = e.Y;
+        enemyDetected = true;
 
-        if (!enemyDetected || dist < enemyDistance)
-        {
-            enemyDetected = true;
-
-            enemyX = e.X;
-            enemyY = e.Y;
-
-            enemyDistance = dist;
-        }
-
-        // =====================================================
-        // RADAR LOCK
-        // =====================================================
-        double radarTurn =
-            NormalizeRelativeAngle(
-                DirectionTo(e.X, e.Y)
-                - RadarDirection);
-
+        double radarTurn = NormalizeRelativeAngle(
+            DirectionTo(enemyX, enemyY) - RadarDirection);
         SetTurnRadarLeft(radarTurn);
+
+        if (GunHeat == 0)
+            SetFire(3);
     }
 
     public override void OnHitBot(HitBotEvent e)
     {
-        // =====================================================
-        // TABRAK + TEMBAK MAKSIMAL
-        // =====================================================
         if (GunHeat == 0 && Energy > 1)
             SetFire(3);
-
-        // Tetap dorong musuh
         SetForward(150);
-
         Go();
     }
 
     public override void OnHitWall(HitWallEvent e)
     {
         // =====================================================
-        // ANTI STUCK WALL
+        // AKTIFKAN ESCAPE MODE — jangan langsung Go()
+        // Biarkan loop utama yang handle via flag
         // =====================================================
-        SetBack(150);
+        isEscapingWall = true;
+        escapeTicksLeft = 8; // ~8 tick mundur = cukup jauh dari tembok
 
-        SetTurnLeft(90 + rnd.Next(90));
+        // Langsung set gerakan escape di tick ini
+        SetBack(120);
+        double angleToCenter = DirectionTo(ArenaWidth / 2.0, ArenaHeight / 2.0);
+        double turnToCenter = NormalizeRelativeAngle(angleToCenter - Direction);
+        SetTurnLeft(turnToCenter);
 
-        SetForward(180);
-
-        Go();
+        // Jangan set enemyDetected = false,
+        // supaya radar tetap ingat posisi musuh
     }
 
     public override void OnHitByBullet(HitByBulletEvent e)
     {
-        // =====================================================
-        // SEDIKIT UBAH ARAH
-        // =====================================================
-        // Tetap agresif tapi tidak terlalu lurus
-        SetTurnLeft(rnd.Next(-20, 20));
-
-        SetForward(100);
-
-        Go();
+        // Tetap agresif, tapi jangan gerak saat escaping tembok
+        if (!isEscapingWall)
+        {
+            SetForward(120);
+            if (rnd.Next(100) < 30)
+                SetTurnLeft(rnd.Next(-25, 25));
+            Go();
+        }
     }
 
     public override void OnBotDeath(BotDeathEvent e)
     {
-        // =====================================================
-        // RESET TARGET
-        // =====================================================
         enemyDetected = false;
-
-        enemyDistance = double.MaxValue;
-
         SetTurnRadarRight(360);
     }
 }
