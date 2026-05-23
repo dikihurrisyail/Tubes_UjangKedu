@@ -1,7 +1,9 @@
 {
   "name": "UjangKeduPiwPiw",
-  "version": "1.0",
-  "authors": ["DIKI"],
+  "version": "1.3",
+  "authors": ["Diki",
+              "Agit",
+              "Cornel"],
   "description": "Greedy bot: memaksimalkan Bullet Damage dengan firepower adaptif berdasarkan jarak, dan survival dengan gerakan zigzag.",
   "homepage": "",
   "countryCodes": ["id"],
