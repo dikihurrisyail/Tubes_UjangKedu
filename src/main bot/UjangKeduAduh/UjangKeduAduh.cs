@@ -5,14 +5,33 @@ using Robocode.TankRoyale.BotApi.Events;
 
 public class UjangKeduAduh : Bot
 {
+    // =========================================================
+    // POSISI MUSUH TERAKHIR
+    // =========================================================
+    // Digunakan untuk:
+    // - mengejar musuh
+    // - aiming gun
+    // =========================================================
     double enemyX;
     double enemyY;
     bool enemyDetected = false;
-    
-    // ← TAMBAHAN: flag anti-stuck
+
+    // =========================================================
+    // SISTEM ANTI-STUCK TEMBOK
+    // =========================================================
+    // Digunakan untuk:
+    // - mendeteksi apakah bot sedang kabur dari tembok
+    // - menghitung sisa tick mode escape
+    // =========================================================
     bool isEscapingWall = false;
     int escapeTicksLeft = 0;
 
+    // =========================================================
+    // UTILITAS UMUM
+    // =========================================================
+    // Digunakan untuk:
+    // - keputusan acak saat kena peluru
+    // =========================================================
     Random rnd = new Random();
 
     static void Main(string[] args) => new UjangKeduAduh().Start();
@@ -21,6 +40,12 @@ public class UjangKeduAduh : Bot
 
     public override void Run()
     {
+        // =========================================================
+        // KONFIGURASI TAMPILAN BOT
+        // =========================================================
+        // Digunakan untuk:
+        // - memberi identitas visual pada bot di arena
+        // =========================================================
         BodyColor = Color.DarkRed;
         TurretColor = Color.Red;
         RadarColor = Color.Yellow;
@@ -29,17 +54,34 @@ public class UjangKeduAduh : Bot
         TracksColor = Color.Black;
         GunColor = Color.Firebrick;
 
+        // =========================================================
+        // KONFIGURASI SINKRONISASI GERAK
+        // =========================================================
+        // Digunakan untuk:
+        // - memisahkan rotasi radar dari badan & gun
+        // - agar radar bisa berputar bebas saat bot bergerak
+        // =========================================================
         AdjustRadarForBodyTurn = true;
         AdjustGunForBodyTurn = true;
         AdjustRadarForGunTurn = true;
 
         while (IsRunning)
         {
+            // =========================================================
+            // RADAR SWEEP KONSTAN
+            // =========================================================
+            // Digunakan untuk:
+            // - memastikan radar terus berputar mendeteksi musuh
+            // =========================================================
             SetTurnRadarRight(360);
 
-            // =========================================
+            // =========================================================
             // PRIORITAS 1: KELUAR DARI TEMBOK
-            // =========================================
+            // =========================================================
+            // Digunakan untuk:
+            // - menangani kondisi bot menabrak tembok
+            // - skip semua logika normal sampai escape selesai
+            // =========================================================
             if (isEscapingWall)
             {
                 // Mundur + belok jauh dari tembok
@@ -57,9 +99,13 @@ public class UjangKeduAduh : Bot
                 continue; // ← skip logika chase saat escaping
             }
 
-            // =========================================
-            // LOGIKA NORMAL
-            // =========================================
+            // =========================================================
+            // PRIORITAS 2: KEJAR DAN SERANG MUSUH
+            // =========================================================
+            // Digunakan untuk:
+            // - mengarahkan badan & gun ke posisi musuh
+            // - maju mendekati musuh dan tembak jika gun siap
+            // =========================================================
             if (enemyDetected)
             {
                 double angleToEnemy = DirectionTo(enemyX, enemyY);
@@ -73,6 +119,12 @@ public class UjangKeduAduh : Bot
                 if (Math.Abs(gunTurn) < 15 && GunHeat == 0)
                     SetFire(3);
             }
+            // =========================================================
+            // PRIORITAS 3: MODE PATROLI (MUSUH BELUM TERDETEKSI)
+            // =========================================================
+            // Digunakan untuk:
+            // - bergerak acak sambil menunggu radar menemukan musuh
+            // =========================================================
             else
             {
                 SetTurnLeft(25);
@@ -83,6 +135,14 @@ public class UjangKeduAduh : Bot
         }
     }
 
+    // =========================================================
+    // EVENT: BOT MUSUH TERDETEKSI RADAR
+    // =========================================================
+    // Digunakan untuk:
+    // - menyimpan posisi musuh terbaru
+    // - mengunci radar ke arah musuh
+    // - langsung tembak jika gun siap
+    // =========================================================
     public override void OnScannedBot(ScannedBotEvent e)
     {
         enemyX = e.X;
@@ -97,6 +157,13 @@ public class UjangKeduAduh : Bot
             SetFire(3);
     }
 
+    // =========================================================
+    // EVENT: BOT MENABRAK BOT MUSUH
+    // =========================================================
+    // Digunakan untuk:
+    // - memanfaatkan kontak langsung untuk tembakan jarak dekat
+    // - mendorong maju agar tidak terkunci di posisi
+    // =========================================================
     public override void OnHitBot(HitBotEvent e)
     {
         if (GunHeat == 0 && Energy > 1)
@@ -105,12 +172,15 @@ public class UjangKeduAduh : Bot
         Go();
     }
 
+    // =========================================================
+    // EVENT: BOT MENABRAK TEMBOK
+    // =========================================================
+    // Digunakan untuk:
+    // - mengaktifkan mode escape dari tembok
+    // - mengatur arah kembali ke tengah arena
+    // =========================================================
     public override void OnHitWall(HitWallEvent e)
     {
-        // =====================================================
-        // AKTIFKAN ESCAPE MODE — jangan langsung Go()
-        // Biarkan loop utama yang handle via flag
-        // =====================================================
         isEscapingWall = true;
         escapeTicksLeft = 8; // ~8 tick mundur = cukup jauh dari tembok
 
@@ -124,9 +194,15 @@ public class UjangKeduAduh : Bot
         // supaya radar tetap ingat posisi musuh
     }
 
+    // =========================================================
+    // EVENT: BOT KENA PELURU MUSUH
+    // =========================================================
+    // Digunakan untuk:
+    // - melakukan manuver menghindar saat tidak sedang escape
+    // - sesekali belok acak agar sulit diprediksi
+    // =========================================================
     public override void OnHitByBullet(HitByBulletEvent e)
     {
-        // Tetap agresif, tapi jangan gerak saat escaping tembok
         if (!isEscapingWall)
         {
             SetForward(120);
@@ -136,6 +212,13 @@ public class UjangKeduAduh : Bot
         }
     }
 
+    // =========================================================
+    // EVENT: BOT MUSUH MATI
+    // =========================================================
+    // Digunakan untuk:
+    // - mereset status deteksi musuh
+    // - memulai kembali radar sweep penuh mencari target baru
+    // =========================================================
     public override void OnBotDeath(BotDeathEvent e)
     {
         enemyDetected = false;
