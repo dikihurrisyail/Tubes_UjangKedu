@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <RootNamespace>KicauMania3</RootNamespace>
+        <RootNamespace>UjangKeduAwoo</RootNamespace>
         <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <LangVersion>10.0</LangVersion>
@@ -10,7 +10,7 @@
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2"/>
     </ItemGroup>
     <ItemGroup>
-        <None Update="KicauMania3.json">
+        <None Update="UjangKeduAwoo.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>

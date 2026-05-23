@@ -1,7 +1,9 @@
 {
-  "name": "KicauMania3",
-  "version": "1.0",
-  "authors": ["IRK Lab"],
+  "name": "UjangKeduAwoo",
+  "version": "1.5",
+  "authors": ["Diki",
+              "Agit",
+              "Cornel"],
   "description": "Greedy bot: prioritaskan survival dengan orbit dan kabur dari musuh dekat untuk memaksimalkan Survival Score.",
   "homepage": "",
   "countryCodes": ["id"],
