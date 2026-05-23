@@ -1,0 +1,12 @@
+{
+  "name": "UjangKeduDorDor",
+  "version": "1.0",
+  "authors": ["Diki",
+              "Agit",
+              "Cornel"],
+  "description": "Greedy bot: memaksimalkan Bullet Damage dengan firepower adaptif berdasarkan jarak, dan survival dengan gerakan zigzag.",
+  "homepage": "",
+  "countryCodes": ["id"],
+  "platform": ".Net 6.0",
+  "programmingLang": "C# 10.0"
+}

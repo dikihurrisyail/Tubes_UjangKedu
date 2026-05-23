@@ -1,0 +1,10 @@
+{
+  "name": "KicauMania3",
+  "version": "1.0",
+  "authors": ["IRK Lab"],
+  "description": "Greedy bot: prioritaskan survival dengan orbit dan kabur dari musuh dekat untuk memaksimalkan Survival Score.",
+  "homepage": "",
+  "countryCodes": ["id"],
+  "platform": ".Net 6.0",
+  "programmingLang": "C# 10.0"
+}
