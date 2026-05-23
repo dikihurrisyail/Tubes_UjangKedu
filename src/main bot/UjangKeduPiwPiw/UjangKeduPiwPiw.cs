@@ -4,150 +4,382 @@ using Robocode.TankRoyale.BotApi;
 using Robocode.TankRoyale.BotApi.Events;
 
 /// <summary>
-/// UjangKeduPiwPiw - Bot Utama (Greedy Strategy 1: Maximize Bullet Damage + Survival)
-/// 
-/// STRATEGI GREEDY:
-/// Heuristik: Selalu tembak musuh terdekat dengan firepower optimal agar energi kembali
-///            lebih banyak (gain = 3x firepower), sambil bergerak menghindar untuk survival.
-/// 
-/// Fungsi Objektif: Memaksimalkan Bullet Damage + Survival Score
-/// 
-/// Langkah Greedy:
-///   1. Radar selalu berputar untuk mendeteksi musuh.
-///   2. Saat musuh terdeteksi, hitung jarak musuh.
-///   3. Pilih firepower secara greedy:
-///      - Jarak dekat  (<200px) : firepower = 3 (peluru berat, damage besar)
-///      - Jarak sedang (<400px) : firepower = 2
-///      - Jarak jauh   (>=400px): firepower = 1 (peluru ringan, lebih mudah kena)
-///   4. Langsung arahkan gun ke musuh dan tembak.
-///   5. Body bergerak zigzag (maju-mundur + belok) untuk menghindari peluru musuh (survival).
-///   6. Jika energi rendah (<20), hindari menembak dan prioritaskan survival (gerak acak).
+/// =============================================================
+/// UjangKeduPiwPiw
+/// =============================================================
+///
+/// BOT ROBOCODE DENGAN STRATEGI GREEDY
+///
+/// =============================================================
+/// STRATEGI UTAMA
+/// =============================================================
+///
+/// Bot menggunakan pendekatan greedy:
+/// yaitu selalu memilih aksi terbaik saat ini
+/// berdasarkan kondisi lokal yang sedang terjadi.
+///
+/// Fokus utama:
+/// 1. Memaksimalkan damage peluru
+/// 2. Mempertahankan survival selama mungkin
+///
+/// =============================================================
+/// FUNGSI OBJEKTIF
+/// =============================================================
+///
+/// Memaksimalkan:
+/// - Bullet Damage Score
+/// - Bullet Kill Bonus
+/// - Survival Score
+///
+/// =============================================================
+/// LANGKAH GREEDY
+/// =============================================================
+///
+/// 1. Radar terus sweep arena untuk mencari musuh
+/// 2. Saat musuh ditemukan:
+///    - hitung jarak musuh
+///    - pilih firepower optimal
+/// 3. Firepower dipilih greedy:
+///    - dekat  -> power besar
+///    - sedang -> power sedang
+///    - jauh   -> power kecil
+/// 4. Gun langsung diarahkan ke musuh
+/// 5. Bot bergerak zigzag untuk menghindari peluru
+/// 6. Jika energi rendah:
+///    - prioritaskan survival
+///    - hindari terlalu agresif
+///
+/// =============================================================
+/// ALASAN STRATEGI GREEDY EFEKTIF
+/// =============================================================
+///
+/// Karena Robocode adalah game real-time,
+/// keputusan cepat tiap tick lebih penting
+/// dibanding perencanaan jangka panjang.
+///
+/// Maka bot selalu memilih aksi terbaik lokal:
+/// - tembakan paling efektif
+/// - gerakan paling aman
+/// - radar tercepat mendeteksi musuh
+///
+/// =============================================================
 /// </summary>
 public class UjangKeduPiwPiw : Bot
 {
-    // Posisi musuh terakhir yang terdeteksi
+    // =========================================================
+    // DATA MUSUH
+    // =========================================================
+    // Menyimpan posisi terakhir musuh
+    // agar dapat digunakan untuk aiming dan targeting
+    // =========================================================
     private double _enemyX = 0;
     private double _enemyY = 0;
+
+    // True jika musuh sedang terdeteksi radar
     private bool _enemyDetected = false;
 
-    // Counter untuk pola gerakan zigzag
+    // =========================================================
+    // MOVEMENT CONTROL
+    // =========================================================
+
+    // Counter untuk mengatur pola zigzag
     private int _moveCounter = 0;
-    private int _moveDirection = 1; // 1 = maju, -1 = mundur
+
+    // Arah gerakan:
+    //  1  = maju
+    // -1  = mundur
+    private int _moveDirection = 1;
 
     static void Main(string[] args)
     {
         new UjangKeduPiwPiw().Start();
     }
 
-    UjangKeduPiwPiw() : base(BotInfo.FromFile("UjangKeduPiwPiw.json")) { }
+    UjangKeduPiwPiw()
+        : base(BotInfo.FromFile("UjangKeduPiwPiw.json")) { }
 
     public override void Run()
     {
-        // Warna khas UjangKeduPiwPiw: merah-hitam seperti burung jalak
-        BodyColor    = Color.FromArgb(20,  20,  20);   // hitam
-        TurretColor  = Color.FromArgb(200, 30,  30);   // merah
-        RadarColor   = Color.FromArgb(255, 200, 0);    // kuning
-        BulletColor  = Color.FromArgb(255, 80,  0);    // oranye
-        ScanColor    = Color.FromArgb(255, 200, 0);    // kuning
+        // =====================================================
+        // PENGATURAN WARNA BOT
+        // =====================================================
+        // Desain merah-hitam
+        // =====================================================
+        BodyColor    = Color.Black;   // hitam
+        TurretColor  = Color.Red;   // merah
+        RadarColor   = Color.Yellow;    // kuning
+        BulletColor  = Color.Orange;    // oranye
+        ScanColor    = Color.Yellow;    // kuning
 
-        // Radar berputar terus secara independen (pisahkan dari body & gun)
+        // =====================================================
+        // RADAR DAN GUN INDEPENDEN
+        // =====================================================
+        // GREEDY:
+        // Agar radar, gun, dan body dapat bekerja
+        // secara bersamaan tanpa saling mengganggu.
+        //
+        // Keuntungan:
+        // - Radar tetap scan
+        // - Gun tetap aiming
+        // - Body tetap dodge
+        // =====================================================
         AdjustRadarForBodyTurn   = true;
         AdjustGunForBodyTurn     = true;
         AdjustRadarForGunTurn    = true;
 
         while (IsRunning)
         {
-            // --- GREEDY: Survival Movement (zigzag) ---
-            // Bergerak zig-zag untuk menghindari peluru musuh
+            // =================================================
+            // SURVIVAL MOVEMENT GREEDY
+            // =================================================
+            //
+            // Objective:
+            // Menghindari peluru musuh.
+            //
+            // Strategi greedy:
+            // Bot terus bergerak zigzag karena:
+            // - target diam mudah ditembak
+            // - perubahan arah mengurangi akurasi musuh
+            //
+            // =================================================
             _moveCounter++;
 
+            // Setiap 20 tick:
+            // - balik arah
+            // - ubah sudut gerakan
             if (_moveCounter % 20 == 0)
             {
-                // Setiap 20 turn, balik arah (zigzag)
+                // Balik arah zigzag
                 _moveDirection *= -1;
-                // Belok sedikit untuk mengubah jalur (tidak mudah diprediksi)
+
+                // Belok random sedikit
+                // agar movement tidak mudah diprediksi
                 TurnLeft(30 + new Random().Next(30));
             }
 
-            // Gerak maju/mundur sesuai arah saat ini
+            // =================================================
+            // GERAK MAJU / MUNDUR
+            // =================================================
+            //
+            // GREEDY:
+            // Selalu bergerak untuk survival.
+            //
+            // =================================================
             if (_moveDirection == 1)
                 SetForward(80);
             else
                 SetBack(80);
 
-            // --- GREEDY: Radar selalu sweep ---
-            // Putar radar 45 derajat tiap turn agar selalu mendeteksi musuh
+            // =================================================
+            // RADAR SWEEP GREEDY
+            // =================================================
+            //
+            // Objective:
+            // Menemukan musuh secepat mungkin.
+            //
+            // Strategi greedy:
+            // Radar terus berputar agar coverage arena besar.
+            //
+            // =================================================
             SetTurnRadarLeft(45);
 
-            // --- GREEDY: Tembak jika musuh terdeteksi dan energi cukup ---
+            // =================================================
+            // ATTACK GREEDY
+            // =================================================
+            //
+            // Objective:
+            // Memaksimalkan damage dengan energi efisien.
+            //
+            // Bot hanya menyerang jika:
+            // - musuh terdeteksi
+            // - energi masih aman
+            //
+            // =================================================
             if (_enemyDetected && Energy > 20)
             {
+                // Hitung jarak musuh
                 double dist = DistanceTo(_enemyX, _enemyY);
 
-                // Pilih firepower secara greedy berdasarkan jarak
-                // Gain energi = 3x firepower, jadi semakin besar firepower
-                // semakin besar potensi gain, tapi peluru lebih lambat (perlu jarak dekat)
+                // =================================================
+                // FIREPOWER GREEDY
+                // =================================================
+                //
+                // Strategi:
+                //
+                // Dekat:
+                //   gunakan power besar
+                //   karena peluang hit tinggi
+                //
+                // Sedang:
+                //   gunakan power sedang
+                //
+                // Jauh:
+                //   gunakan power kecil
+                //   karena peluru lebih cepat
+                //
+                // =================================================
                 double firePower;
-                if (dist < 200)
-                    firePower = 3.0; // Peluru berat: damage besar, gain energi besar
-                else if (dist < 400)
-                    firePower = 2.0; // Seimbang
-                else
-                    firePower = 1.0; // Peluru ringan: lebih mudah mengenai musuh jauh
 
-                // Arahkan gun ke posisi musuh terdeteksi
-                double angleToEnemy = DirectionTo(_enemyX, _enemyY);
-                double gunTurn = NormalizeRelativeAngle(angleToEnemy - GunDirection);
+                if (dist < 200)
+                    firePower = 3.0;
+
+                else if (dist < 400)
+                    firePower = 2.0;
+
+                else
+                    firePower = 1.0;
+
+                // =================================================
+                // TARGETING GREEDY
+                // =================================================
+                //
+                // Objective:
+                // Mengarahkan gun ke posisi musuh
+                // secepat mungkin.
+                //
+                // =================================================
+                double angleToEnemy =
+                    DirectionTo(_enemyX, _enemyY);
+
+                // Hitung selisih sudut gun dengan target
+                double gunTurn =
+                    NormalizeRelativeAngle(
+                        angleToEnemy - GunDirection);
+
+                // Putar gun menuju musuh
                 SetTurnGunLeft(gunTurn);
 
-                // Tembak jika gun sudah cukup terarah (bearing < 10 derajat)
-                if (Math.Abs(gunTurn) < 10 && GunHeat == 0)
+                // =================================================
+                // ACCURACY GREEDY
+                // =================================================
+                //
+                // Objective:
+                // Mengurangi peluru terbuang.
+                //
+                // Strategi greedy:
+                // Hanya tembak jika aim cukup presisi.
+                //
+                // =================================================
+                if (Math.Abs(gunTurn) < 10 &&
+                    GunHeat == 0)
+                {
                     SetFire(firePower);
+                }
             }
 
-            Go(); // Kirim semua perintah ke server
+            // =================================================
+            // EKSEKUSI SEMUA COMMAND
+            // =================================================
+            Go();
         }
     }
 
     public override void OnScannedBot(ScannedBotEvent e)
     {
-        // Simpan posisi musuh yang terdeteksi (untuk targeting)
+        // =====================================================
+        // UPDATE DATA MUSUH
+        // =====================================================
+        //
+        // Menyimpan posisi musuh terbaru
+        // agar bisa digunakan oleh targeting system.
+        //
+        // =====================================================
         _enemyX = e.X;
         _enemyY = e.Y;
+
         _enemyDetected = true;
 
-        // GREEDY: Langsung lock radar ke musuh yang baru di-scan
-        // agar terus terpantau di turn berikutnya
-        double angleToEnemy = DirectionTo(e.X, e.Y);
-        double radarTurn = NormalizeRelativeAngle(angleToEnemy - RadarDirection);
+        // =====================================================
+        // RADAR LOCK GREEDY
+        // =====================================================
+        //
+        // Objective:
+        // Menjaga radar tetap fokus pada musuh.
+        //
+        // Strategi greedy:
+        // Begitu musuh terdeteksi,
+        // radar langsung dikunci ke arah musuh.
+        //
+        // =====================================================
+        double angleToEnemy =
+            DirectionTo(e.X, e.Y);
+
+        double radarTurn =
+            NormalizeRelativeAngle(
+                angleToEnemy - RadarDirection);
+
         SetTurnRadarLeft(radarTurn);
     }
 
     public override void OnHitWall(HitWallEvent e)
     {
-        // Balik arah saat menabrak dinding untuk menghindari wall damage terus-menerus
+        // =====================================================
+        // WALL AVOIDANCE GREEDY
+        // =====================================================
+        //
+        // Objective:
+        // Menghindari stuck di tembok.
+        //
+        // Strategi greedy:
+        // - balik arah
+        // - menjauh dari tembok
+        //
+        // =====================================================
+
         _moveDirection *= -1;
+
         SetBack(50);
+
         TurnLeft(45);
+
         Go();
     }
 
     public override void OnHitBot(HitBotEvent e)
     {
-        // Jika menabrak bot musuh:
-        // GREEDY: Tembak langsung dengan firepower tinggi (musuh sangat dekat = firepower 3)
-        // sekaligus mundur agar tidak kena balik
+        // =====================================================
+        // CLOSE RANGE GREEDY
+        // =====================================================
+        //
+        // Objective:
+        // Maksimalkan damage saat sangat dekat.
+        //
+        // Strategi greedy:
+        // Gunakan firepower maksimum
+        // karena peluang hit hampir pasti.
+        //
+        // =====================================================
         if (Energy > 10 && GunHeat == 0)
             SetFire(3);
 
-        _moveDirection *= -1; // Mundur dari tabrakan
+        // =====================================================
+        // ESCAPE GREEDY
+        // =====================================================
+        //
+        // Setelah tabrakan:
+        // - mundur
+        // - ubah arah
+        //
+        // agar tidak jadi target empuk.
+        //
+        // =====================================================
+        _moveDirection *= -1;
+
         SetBack(50);
+
         Go();
     }
 
     public override void OnBotDeath(BotDeathEvent e)
     {
-        // Saat bot musuh mati, reset deteksi agar radar mencari musuh baru
+        // =====================================================
+        // TARGET RESET GREEDY
+        // =====================================================
+        //
+        // Objective:
+        // Segera mencari target baru.
+        //
+        // =====================================================
         _enemyDetected = false;
     }
 }
