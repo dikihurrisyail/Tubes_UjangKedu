@@ -8,27 +8,13 @@ using Robocode.TankRoyale.BotApi.Events;
 /// UjangKeduAduh
 /// ============================================================
 ///
-/// STRATEGI:
-/// Bot agresif yang:
-/// 1. Mengejar musuh tanpa henti
-/// 2. Menabrak musuh
-/// 3. Menembak dengan firepower maksimum
+/// BOT TABRAK AGRESIF
 ///
-/// GREEDY STRATEGY:
-/// - Selalu memilih aksi paling agresif
-/// - Selalu mendekati musuh
-/// - Selalu memakai firepower maksimum
-/// - Saat tabrakan -> spam peluru besar
-///
-/// OBJECTIVE FUNCTION:
-/// - Maksimalkan bullet damage
-/// - Maksimalkan ram damage
-/// - Menekan musuh secepat mungkin
-///
-/// Cocok untuk:
-/// - Duel 1v1
-/// - Arena kecil
-/// - Melawan bot defensif
+/// PERBAIKAN:
+/// - Anti nyangkut tembok
+/// - Selalu kembali ke tengah arena
+/// - Movement lebih stabil
+/// - Tetap agresif menabrak musuh
 /// ============================================================
 /// </summary>
 public class UjangKeduAduh : Bot
@@ -40,9 +26,6 @@ public class UjangKeduAduh : Bot
     double enemyY;
 
     bool enemyDetected = false;
-
-    // Arah gerakan
-    int moveDir = 1;
 
     Random rnd = new Random();
 
@@ -77,21 +60,54 @@ public class UjangKeduAduh : Bot
         while (IsRunning)
         {
             // =================================================
-            // RADAR SWEEP
+            // ANTI WALL SYSTEM
             // =================================================
-            // Radar terus berputar mencari musuh
-            SetTurnRadarRight(360);
+            // Jika dekat tembok:
+            // langsung kembali ke tengah arena
+            // =================================================
+            double margin = 120;
+
+            bool nearWall =
+                X < margin ||
+                X > ArenaWidth - margin ||
+                Y < margin ||
+                Y > ArenaHeight - margin;
+
+            if (nearWall)
+            {
+                double centerAngle =
+                    NormalizeRelativeAngle(
+                        DirectionTo(
+                            ArenaWidth / 2,
+                            ArenaHeight / 2)
+                        - Direction);
+
+                SetTurnLeft(centerAngle);
+
+                // Dorong jauh dari tembok
+                SetForward(220);
+
+                // Radar tetap jalan
+                SetTurnRadarRight(360);
+
+                Go();
+
+                continue;
+            }
 
             // =================================================
-            // JIKA MUSUH TERDETEKSI
+            // RADAR SWEEP
+            // =================================================
+            SetTurnRadarRight(45);
+
+            // =================================================
+            // MODE AGRESIF
             // =================================================
             if (enemyDetected)
             {
                 // =============================================
-                // KEJAR MUSUH
+                // ARAH KE MUSUH
                 // =============================================
-                // Greedy:
-                // Selalu mendekati target secepat mungkin
                 double angleToEnemy =
                     DirectionTo(enemyX, enemyY);
 
@@ -99,16 +115,16 @@ public class UjangKeduAduh : Bot
                     NormalizeRelativeAngle(
                         angleToEnemy - Direction);
 
+                // Putar body ke musuh
                 SetTurnLeft(bodyTurn);
 
                 // =============================================
-                // MAJU TABRAK MUSUH
+                // MAJU TABRAK
                 // =============================================
-                // Fokus utama: ram musuh
-                SetForward(200);
+                SetForward(160);
 
                 // =============================================
-                // AIM KE MUSUH
+                // AIM GUN
                 // =============================================
                 double gunTurn =
                     NormalizeRelativeAngle(
@@ -117,11 +133,11 @@ public class UjangKeduAduh : Bot
                 SetTurnGunLeft(gunTurn);
 
                 // =============================================
-                // TEMBAK FULL POWER
+                // TEMBAK POWER MAKSIMAL
                 // =============================================
-                // Firepower maksimum = 3
                 if (Math.Abs(gunTurn) < 15 &&
-                    GunHeat == 0)
+                    GunHeat == 0 &&
+                    Energy > 1)
                 {
                     SetFire(3);
                 }
@@ -131,10 +147,9 @@ public class UjangKeduAduh : Bot
                 // =================================================
                 // SEARCH MODE
                 // =================================================
-                // Jika belum ada musuh:
-                // muter sambil maju
-                SetTurnLeft(25);
-                SetForward(100);
+                SetTurnLeft(20);
+
+                SetForward(120);
             }
 
             Go();
@@ -144,7 +159,7 @@ public class UjangKeduAduh : Bot
     public override void OnScannedBot(ScannedBotEvent e)
     {
         // =====================================================
-        // UPDATE POSISI MUSUH
+        // UPDATE TARGET
         // =====================================================
         enemyX = e.X;
         enemyY = e.Y;
@@ -154,7 +169,6 @@ public class UjangKeduAduh : Bot
         // =====================================================
         // RADAR LOCK
         // =====================================================
-        // Radar langsung fokus ke musuh
         double radarTurn =
             NormalizeRelativeAngle(
                 DirectionTo(enemyX, enemyY)
@@ -163,24 +177,25 @@ public class UjangKeduAduh : Bot
         SetTurnRadarLeft(radarTurn);
 
         // =====================================================
-        // TEMBAK LANGSUNG SAAT SCAN
+        // TEMBAK INSTAN
         // =====================================================
-        if (GunHeat == 0)
+        if (GunHeat == 0 && Energy > 1)
             SetFire(3);
     }
 
     public override void OnHitBot(HitBotEvent e)
     {
         // =====================================================
-        // CLOSE COMBAT MODE
+        // CLOSE COMBAT
         // =====================================================
         // Saat tabrakan:
-        // spam peluru maksimum
+        // spam damage besar
+        // =====================================================
         if (GunHeat == 0 && Energy > 1)
             SetFire(3);
 
-        // Dorong terus musuh
-        SetForward(150);
+        // Tetap dorong musuh
+        SetForward(120);
 
         Go();
     }
@@ -190,13 +205,20 @@ public class UjangKeduAduh : Bot
         // =====================================================
         // ANTI STUCK WALL
         // =====================================================
-        // Jika nabrak tembok:
-        // mundur lalu cari lagi
-        SetBack(100);
+        // PERBAIKAN UTAMA:
+        // - mundur jauh
+        // - belok random besar
+        // - kembali ke tengah
+        // =====================================================
 
-        SetTurnLeft(60 + rnd.Next(40));
+        // Mundur dari tembok
+        SetBack(150);
 
-        moveDir *= -1;
+        // Belok besar agar tidak nyangkut lagi
+        SetTurnLeft(90 + rnd.Next(90));
+
+        // Dorong ke arah baru
+        SetForward(180);
 
         Go();
     }
@@ -204,15 +226,14 @@ public class UjangKeduAduh : Bot
     public override void OnHitByBullet(HitByBulletEvent e)
     {
         // =====================================================
-        // TETAP AGRESIF SAAT DITEMBAK
+        // TETAP AGRESIF
         // =====================================================
-        // Tidak dodge,
-        // malah makin maju
-        SetForward(120);
+        // Saat ditembak:
+        // sedikit ubah arah tapi tetap maju
+        // =====================================================
+        SetTurnLeft(rnd.Next(-20, 20));
 
-        // Kadang belok sedikit
-        if (rnd.Next(100) < 30)
-            SetTurnLeft(rnd.Next(-25, 25));
+        SetForward(100);
 
         Go();
     }
@@ -224,7 +245,7 @@ public class UjangKeduAduh : Bot
         // =====================================================
         enemyDetected = false;
 
-        // Cari musuh baru
+        // Cari target baru
         SetTurnRadarRight(360);
     }
 }
