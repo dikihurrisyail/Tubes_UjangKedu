@@ -2,153 +2,160 @@
 
 ## Deskripsi Project
 
-Project ini berisi beberapa bot permainan **Robocode Tank Royale** yang dibuat menggunakan bahasa **C# (.NET)** dengan pendekatan algoritma **Greedy**.
+Project ini berisi beberapa bot untuk game **Robocode Tank Royale** yang dibuat menggunakan bahasa **C# (.NET)** dengan pendekatan algoritma **Greedy**.
 
-Bot yang dibuat:
+Bot yang dibuat pada project ini antara lain:
 
 * `UjangKeduDorDor`
 * `UjangKeduAwoo`
 * `UjangKeduPiwPiw`
 * `UjangKeduAduh`
 
-Setiap bot memiliki strategi greedy yang berbeda untuk memaksimalkan skor permainan berdasarkan kondisi lokal saat pertandingan berlangsung.
+Masing-masing bot memiliki strategi yang berbeda dalam mengambil keputusan selama pertandingan berlangsung. Tujuan utama dari bot-bot ini adalah mendapatkan skor setinggi mungkin dengan memaksimalkan damage, akurasi tembakan, dan kemampuan bertahan hidup.
 
 ---
 
-# Penjelasan Strategi Greedy Tiap Bot
+# Penjelasan Strategi Greedy Setiap Bot
 
 ---
 
 ## 1. UjangKeduDorDor
 
-### Strategi Utama
+### Strategi yang Digunakan
 
-Bot menggunakan kombinasi:
+Bot ini menggunakan beberapa kombinasi strategi seperti:
 
-* Greedy Movement
 * Predictive Targeting
+* Greedy Movement
 * Dynamic Firepower
-* Bullet Dodge Detection
 * Radar Lock
-* Anti-Wall Movement
+* Bullet Dodge Detection
+* Anti-Wall System
 
-### Implementasi Greedy
+### Cara Kerja Greedy
 
-Pada setiap tick permainan, bot memilih aksi terbaik berdasarkan kondisi saat itu:
+Bot akan mengambil keputusan terbaik berdasarkan kondisi saat itu juga.
 
-* Jika musuh dekat → gunakan firepower besar
-* Jika musuh jauh → gunakan firepower kecil agar peluru lebih cepat
-* Jika energi musuh turun → diasumsikan musuh menembak → langsung dodge
-* Jika dekat tembok → segera kembali ke tengah arena
-* Jika aiming akurat → langsung tembak
+Contohnya:
+
+* Jika musuh berada dekat → bot memakai power peluru besar
+* Jika musuh jauh → bot memakai power kecil supaya peluru lebih cepat
+* Jika energi musuh turun → diasumsikan musuh baru menembak lalu bot langsung dodge
+* Jika terlalu dekat dengan tembok → bot bergerak kembali ke tengah arena
+* Bot hanya menembak ketika arah gun sudah cukup presisi
 
 ### Objective Function
 
-Memaksimalkan:
+Bot difokuskan untuk:
 
-* Bullet Damage
-* Survival Score
-* Hit Accuracy
-* Kill Bonus
+* Memaksimalkan damage peluru
+* Meningkatkan akurasi hit
+* Bertahan hidup lebih lama
+* Mendapatkan kill bonus
 
 ---
 
 ## 2. UjangKeduAwoo
 
-### Strategi Utama
+### Strategi yang Digunakan
 
-Bot menggunakan:
+Bot ini menggunakan strategi yang lebih advanced, yaitu:
 
-* Advanced Greedy AI
 * Predictive Targeting
 * Orbit Movement
 * Dynamic Distance Control
-* Anti-Linear Movement
+* Anti Linear Movement
 * Wall Smoothing
+* Radar Lock
 
-### Implementasi Greedy
+### Cara Kerja Greedy
 
-Bot selalu memilih posisi terbaik secara lokal:
+Bot akan selalu mencari posisi terbaik secara lokal pada setiap tick permainan.
 
-* Menjaga jarak ideal terhadap musuh
-* Bergerak orbit agar sulit ditembak
-* Mengubah arah secara random untuk menghindari prediksi lawan
-* Menggunakan predictive aiming untuk menembak posisi masa depan musuh
-* Mengunci radar pada target
+Contohnya:
+
+* Menjaga jarak ideal dengan musuh
+* Bergerak memutari musuh agar sulit ditembak
+* Mengubah arah secara random supaya movement tidak mudah ditebak
+* Menggunakan prediksi posisi musuh saat melakukan aiming
+* Mengunci radar ke target agar tidak kehilangan musuh
 
 ### Objective Function
 
-Memaksimalkan:
+Tujuan utama bot:
 
-* Akurasi tembakan
-* Damage per shot
-* Survival time
-* Movement unpredictability
+* Meningkatkan akurasi tembakan
+* Memberikan damage besar
+* Bertahan hidup selama mungkin
+* Membuat movement sulit diprediksi lawan
 
 ---
 
 ## 3. UjangKeduPiwPiw
 
-### Strategi Utama
+### Strategi yang Digunakan
 
-Bot menggunakan:
+Bot ini menggunakan strategi greedy sederhana seperti:
 
-* Simple Greedy Strategy
 * Zig-Zag Movement
 * Radar Sweep
 * Dynamic Firepower
 
-### Implementasi Greedy
+### Cara Kerja Greedy
 
-Bot memilih aksi paling efektif setiap tick:
+Bot memilih aksi yang paling efektif berdasarkan situasi saat ini.
 
-* Radar terus sweep mencari musuh
-* Gerakan zig-zag untuk mengurangi kemungkinan terkena peluru
-* Firepower dipilih berdasarkan jarak:
+Contohnya:
+
+* Radar terus berputar untuk mencari musuh
+* Bot bergerak zig-zag agar lebih sulit terkena peluru
+* Firepower disesuaikan berdasarkan jarak musuh:
 
   * Dekat → power besar
   * Sedang → power sedang
   * Jauh → power kecil
-* Menembak hanya jika aim cukup akurat
+* Bot hanya menembak ketika aim cukup akurat
 
 ### Objective Function
 
-Memaksimalkan:
+Fokus utama bot:
 
-* Bullet Damage
-* Survival Score
-* Fire Efficiency
+* Memaksimalkan damage
+* Menghemat energi
+* Meningkatkan survival rate
 
 ---
 
 ## 4. UjangKeduAduh
 
-### Strategi Utama
+### Strategi yang Digunakan
 
-Bot menggunakan:
+Bot ini menggunakan strategi agresif seperti:
 
-* Aggressive Greedy Chase
-* Close Combat Strategy
-* Anti-Wall Escape System
+* Aggressive Chase
+* Close Combat
 * Radar Lock
+* Anti-Wall Escape System
 
-### Implementasi Greedy
+### Cara Kerja Greedy
 
-Bot fokus mengejar dan menekan musuh:
+Bot fokus mengejar dan menyerang musuh secepat mungkin.
 
-* Langsung mengejar posisi musuh
-* Menembak maksimum saat jarak dekat
-* Mengunci radar pada musuh
-* Jika menabrak tembok → segera escape menuju tengah arena
-* Menghindari peluru menggunakan random movement
+Contohnya:
+
+* Langsung mendekati posisi musuh
+* Menggunakan firepower maksimum saat jarak dekat
+* Radar terus mengunci musuh
+* Jika terkena tembok → bot segera keluar menuju area aman
+* Jika terkena peluru → bot melakukan gerakan acak untuk dodge
 
 ### Objective Function
 
-Memaksimalkan:
+Bot difokuskan untuk:
 
-* Aggressive Damage
-* Close Combat Win Rate
-* Survival from Wall Trap
+* Memberikan damage sebesar mungkin
+* Menang pada close combat
+* Menghindari stuck di tembok
 
 ---
 
@@ -160,7 +167,7 @@ Memaksimalkan:
 
 Disarankan menggunakan:
 
-* .NET 6 SDK atau lebih baru
+* .NET 6 atau versi lebih baru
 
 Cek instalasi:
 
@@ -172,19 +179,19 @@ dotnet --version
 
 ### 2. Robocode Tank Royale
 
-Install Robocode Tank Royale:
+Install Robocode Tank Royale melalui website resmi:
 
-[https://robocode-dev.github.io/tank-royale/](https://robocode-dev.github.io/tank-royale/)
+[Robocode Tank Royale Official Website](https://robocode-dev.github.io/tank-royale/?utm_source=chatgpt.com)
 
 ---
 
 ### 3. Java Runtime (JDK)
 
-Karena Robocode Tank Royale berjalan menggunakan Java.
+Karena Robocode Tank Royale berjalan menggunakan Java, maka perlu menginstall JDK.
 
-Disarankan:
+Disarankan menggunakan:
 
-* JDK 17 atau lebih baru
+* JDK 21 atau lebih baru
 
 Cek instalasi:
 
@@ -194,9 +201,7 @@ java -version
 
 ---
 
-# Struktur Project
-
-Contoh struktur folder:
+# Struktur Folder Project
 
 ```text
 bot/
@@ -215,7 +220,7 @@ bot/
 
 ---
 
-# Cara Build / Compile Program
+# Cara Build dan Menjalankan Program
 
 Masuk ke folder bot:
 
@@ -247,8 +252,8 @@ dotnet run
 
 1. Jalankan server Robocode Tank Royale
 2. Jalankan GUI Robocode
-3. Pastikan bot sudah berada pada folder bots
-4. Jalankan bot menggunakan:
+3. Pastikan file bot sudah berada di folder bots
+4. Jalankan bot menggunakan command:
 
 ```bash
 dotnet run
@@ -260,24 +265,24 @@ dotnet run
 
 # Kendala Saat Development
 
-Beberapa kendala yang dihadapi selama development:
+Selama proses development terdapat beberapa kendala, di antaranya:
 
 ## 1. Bot Sering Menabrak Tembok
 
-Solusi:
+Solusi yang dilakukan:
 
-* Menambahkan anti-wall system
+* Menambahkan anti-wall movement
 * Wall smoothing
 * Escape mode
 
 ---
 
-## 2. Aim Tidak Akurat
+## 2. Aim Kurang Akurat
 
 Solusi:
 
 * Menggunakan predictive targeting
-* Menghitung posisi masa depan musuh berdasarkan:
+* Menghitung prediksi posisi musuh berdasarkan:
 
   * speed
   * direction
@@ -289,48 +294,45 @@ Solusi:
 
 Solusi:
 
-* Menambahkan random zig-zag
+* Menambahkan movement random
+* Zig-zag movement
 * Orbit movement
 * Random direction switch
 
 ---
 
-## 4. Radar Kehilangan Musuh
+## 4. Radar Sering Kehilangan Musuh
 
 Solusi:
 
 * Menggunakan radar lock
-* Overshoot radar angle
+* Menambahkan overshoot radar angle
 
 ---
 
-## 5. Bot Terlalu Boros Energi
+## 5. Energi Bot Cepat Habis
 
 Solusi:
 
 * Dynamic firepower
-* Energy-aware shooting
+* Pengaturan power peluru berdasarkan kondisi energi
 
 ---
 
 # Algoritma Greedy yang Digunakan
 
-Seluruh bot menggunakan konsep:
+Semua bot pada project ini menggunakan konsep **Greedy Algorithm**.
 
-## Greedy Decision Making
-
-Artinya:
-
-Pada setiap tick permainan, bot langsung memilih aksi yang dianggap paling optimal berdasarkan kondisi saat itu tanpa menghitung seluruh kemungkinan jangka panjang.
+Artinya, pada setiap tick permainan bot akan langsung memilih aksi yang dianggap paling optimal berdasarkan kondisi saat itu tanpa memikirkan seluruh kemungkinan jangka panjang.
 
 Contoh keputusan greedy:
 
-* Menembak dengan power terbesar ketika peluang hit tinggi
-* Dodge segera ketika musuh menembak
-* Bergerak menjauh saat terlalu dekat
-* Mendekat ketika musuh terlalu jauh
+* Menggunakan power besar ketika peluang hit tinggi
+* Langsung dodge ketika mendeteksi musuh menembak
+* Menjauh saat posisi terlalu dekat
+* Mendekat saat musuh terlalu jauh
 
-Karena Robocode bersifat real-time, pendekatan greedy efektif untuk menghasilkan keputusan cepat dan responsif.
+Pendekatan greedy cocok digunakan pada Robocode karena permainan berjalan secara real-time sehingga bot harus mengambil keputusan dengan cepat.
 
 ---
 
