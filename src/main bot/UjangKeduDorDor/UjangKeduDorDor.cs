@@ -77,8 +77,8 @@ public class UjangKeduDorDor : Bot
         // =========================================================
         BodyColor = Color.Pink;
         TurretColor = Color.Red;
-        RadarColor = Color.Yellow;
-        BulletColor = Color.Orange;
+        RadarColor = Color.White;
+        BulletColor = Color.Black;
         ScanColor = Color.Cyan;
         TracksColor = Color.Gray;
         GunColor = Color.White;
@@ -106,14 +106,10 @@ public class UjangKeduDorDor : Bot
             // ANTI WALL GREEDY
             // =====================================================
             // Objective:
-            // Menghindari tabrakan tembok karena:
-            // - kehilangan momentum
-            // - mudah ditembak
-            // - posisi buruk
+            // Menghindari tabrakan tembok
             //
             // Strategi greedy:
-            // Jika dekat tembok → langsung pilih aksi lokal terbaik
-            // yaitu kembali ke tengah arena.
+            // Jika dekat tembok → langsung kembali ke tengah arena.
             // =====================================================
             double margin = 140;
 
@@ -169,12 +165,9 @@ public class UjangKeduDorDor : Bot
                 // =================================================
                 // Objective:
                 // Tetap bergerak agar sulit ditembak
-                // sambil mempertahankan posisi ideal.
                 //
                 // Strategi greedy:
-                // Pilih sudut gerakan yang memberi:
-                // - peluang dodge tinggi
-                // - tetap bisa menyerang
+                // Pilih sudut gerakan yang tetap bisa menyerang
                 // =================================================
                 double angle = NormalizeRelativeAngle(
                     DirectionTo(ex, ey) - Direction + 35 * moveDir);
@@ -186,14 +179,12 @@ public class UjangKeduDorDor : Bot
                 // Menghindari peluru secepat mungkin.
                 //
                 // Strategi greedy:
-                // Begitu energi musuh turun,
-                // diasumsikan musuh menembak.
+                // Jika energi musuh turun,
+                // artinya musuh menembak.
                 //
                 // Bot langsung:
                 // - ganti arah
                 // - bergerak random
-                //
-                // untuk memaksimalkan peluang dodge lokal.
                 // =================================================
                 if (bulletDetected)
                 {
@@ -306,15 +297,13 @@ public class UjangKeduDorDor : Bot
                 // PREDICTIVE AIM GREEDY
                 // =================================================
                 // Objective:
-                // Menembak posisi masa depan musuh.
+                // Menembak posisi selanjutnya musuh.
                 //
                 // Strategi greedy:
                 // Menggunakan:
                 // - arah musuh
                 // - kecepatan musuh
                 // - kecepatan peluru
-                //
-                // untuk memilih titik tembak terbaik lokal.
                 // =================================================
                 double bulletSpeed = 20 - (3 * realFire);
 
@@ -397,7 +386,7 @@ public class UjangKeduDorDor : Bot
         //
         // Strategi greedy:
         // Jika energi musuh turun sedikit,
-        // diasumsikan musuh baru menembak.
+        // artinya musuh baru menembak.
         // =========================================================
         lastEnemyEnergy = enemyEnergy;
         enemyEnergy = e.Energy;
@@ -515,7 +504,7 @@ public class UjangKeduDorDor : Bot
         // TARGET SWITCH GREEDY
         // =========================================================
         // Objective:
-        // Cepat menemukan target baru.
+        // Menemukan target baru jika musuh mati.
         // =========================================================
         enemyDetected = false;
 
