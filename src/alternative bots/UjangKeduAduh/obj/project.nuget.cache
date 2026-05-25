@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "VA3ZBHotZ2OvHPdk7cBTRnQ6WMBn2kEgWQqYoBKxuMDcVqZMqU80m7DXg6okDVdJrC03PEmgdbZ14pwto3/y5A==",
+  "dgSpecHash": "QIpUeqDeuBkRmYjFXqLvqWlVwbB9TVQsBFgBqlbCNgYp0RtnoX82YPzVxzVi5lhK/rp3+vx84Iv/nlFNCY7Zog==",
   "success": true,
-  "projectFilePath": "D:\\Kuliah\\Tugas\\STIMA\\Tubes_UjangKedu\\src\\main bot\\UjangKeduAduh\\UjangKeduAduh.csproj",
+  "projectFilePath": "D:\\Kuliah\\Tugas\\STIMA\\Tubes_UjangKedu\\src\\alternative bots\\UjangKeduAduh\\UjangKeduAduh.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Pongo\\.nuget\\packages\\microsoft.build.locator\\1.7.8\\microsoft.build.locator.1.7.8.nupkg.sha512",
     "C:\\Users\\Pongo\\.nuget\\packages\\microsoft.extensions.configuration\\8.0.0\\microsoft.extensions.configuration.8.0.0.nupkg.sha512",

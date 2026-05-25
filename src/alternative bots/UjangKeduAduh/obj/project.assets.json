@@ -931,11 +931,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Kuliah\\Tugas\\STIMA\\Tubes_UjangKedu\\src\\main bot\\UjangKeduAduh\\UjangKeduAduh.csproj",
+      "projectUniqueName": "D:\\Kuliah\\Tugas\\STIMA\\Tubes_UjangKedu\\src\\alternative bots\\UjangKeduAduh\\UjangKeduAduh.csproj",
       "projectName": "UjangKeduAduh",
-      "projectPath": "D:\\Kuliah\\Tugas\\STIMA\\Tubes_UjangKedu\\src\\main bot\\UjangKeduAduh\\UjangKeduAduh.csproj",
+      "projectPath": "D:\\Kuliah\\Tugas\\STIMA\\Tubes_UjangKedu\\src\\alternative bots\\UjangKeduAduh\\UjangKeduAduh.csproj",
       "packagesPath": "C:\\Users\\Pongo\\.nuget\\packages\\",
-      "outputPath": "D:\\Kuliah\\Tugas\\STIMA\\Tubes_UjangKedu\\src\\main bot\\UjangKeduAduh\\obj\\",
+      "outputPath": "D:\\Kuliah\\Tugas\\STIMA\\Tubes_UjangKedu\\src\\alternative bots\\UjangKeduAduh\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Pongo\\AppData\\Roaming\\NuGet\\NuGet.Config"
