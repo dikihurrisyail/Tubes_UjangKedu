@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Kuliah\\Tugas\\STIMA\\bot\\UjangKeduDorDor\\UjangKeduDorDor.csproj": {}
+    "D:\\Kuliah\\Tugas\\STIMA\\Tubes_UjangKedu\\src\\main bot\\UjangKeduDorDor\\UjangKeduDorDor.csproj": {}
   },
   "projects": {
-    "D:\\Kuliah\\Tugas\\STIMA\\bot\\UjangKeduDorDor\\UjangKeduDorDor.csproj": {
+    "D:\\Kuliah\\Tugas\\STIMA\\Tubes_UjangKedu\\src\\main bot\\UjangKeduDorDor\\UjangKeduDorDor.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Kuliah\\Tugas\\STIMA\\bot\\UjangKeduDorDor\\UjangKeduDorDor.csproj",
+        "projectUniqueName": "D:\\Kuliah\\Tugas\\STIMA\\Tubes_UjangKedu\\src\\main bot\\UjangKeduDorDor\\UjangKeduDorDor.csproj",
         "projectName": "UjangKeduDorDor",
-        "projectPath": "D:\\Kuliah\\Tugas\\STIMA\\bot\\UjangKeduDorDor\\UjangKeduDorDor.csproj",
+        "projectPath": "D:\\Kuliah\\Tugas\\STIMA\\Tubes_UjangKedu\\src\\main bot\\UjangKeduDorDor\\UjangKeduDorDor.csproj",
         "packagesPath": "C:\\Users\\Pongo\\.nuget\\packages\\",
-        "outputPath": "D:\\Kuliah\\Tugas\\STIMA\\bot\\UjangKeduDorDor\\obj\\",
+        "outputPath": "D:\\Kuliah\\Tugas\\STIMA\\Tubes_UjangKedu\\src\\main bot\\UjangKeduDorDor\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Pongo\\AppData\\Roaming\\NuGet\\NuGet.Config"
